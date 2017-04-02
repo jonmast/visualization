@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Map, TileLayer } from 'react-leaflet'
+import { Map, TileLayer, GeoJSON } from 'react-leaflet'
 
 // Begin Map Variables
 const stamenTonerTiles = 'http://stamen-tiles-{s}.a.ssl.fastly.net/toner-background/{z}/{x}/{y}.png'
@@ -15,6 +15,27 @@ const zoomLevel = 7
  * https://azavea.com/blog/2016/12/05/getting-started-with-react-and-leaflet
  */
 class MapLayer extends Component {
+  constructor () {
+    super()
+    this.state = { districtData: null }
+
+    this.fetchDistrictData()
+  }
+
+  fetchDistrictData () {
+    fetch('/data/pa-senate-districts.geojson').then(response =>
+      response.json()
+    ).then(json =>
+      this.setState({ districtData: json })
+    )
+  }
+
+  districtsLayer () {
+    if (!this.state.districtData) return null
+
+    return <GeoJSON data={this.state.districtData} />
+  }
+
   render () {
     return (
       <div className='leaflet-container'>
@@ -22,6 +43,7 @@ class MapLayer extends Component {
           <TileLayer
             attribution={stamenTonerAttr}
             url={stamenTonerTiles} />
+          {this.districtsLayer()}
         </Map>
       </div>
     )
